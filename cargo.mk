@@ -5,7 +5,7 @@ cargo-build-release:## 	cargo-build-release
 install:cargo-install## 	install
 cargo-i:cargo-install
 cargo-install:## 	cargo-install
-	cargo install --path crates/rqbit
+	cargo install --path crates/gnostr-bits
 cargo-sort:## 	cargo-sort
 	@[ -x cargo-sort ] || cargo install cargo-sort
 	cargo-sort

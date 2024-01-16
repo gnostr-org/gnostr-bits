@@ -3,24 +3,24 @@ all:
 @PHONY: webui-deps
 webui-deps:## 	webui-deps
 	cd desktop && npm install
-	cd crates/librqbit/webui && npm install
+	cd crates/libgnostr-bits/webui && npm install
 
 @PHONY: webui-dev
 webui-dev: webui-deps## 	webui-dev
-	cd crates/librqbit/webui && \
+	cd crates/libgnostr-bits/webui && \
 	npm run dev
 
 @PHONY: webui-build
 webui-build: webui-deps## 	webui-build
-	cd crates/librqbit/webui && \
+	cd crates/libgnostr-bits/webui && \
 	npm run build
 
 @PHONY: devserver
 devserver:## 	devserver
-	echo -n '' > /tmp/rqbit-log
+	echo -n '' > /tmp/gnostr-bits-log
 	cargo run --release -- \
-		--log-file /tmp/rqbit-log \
-		--log-file-rust-log=debug,librqbit=trace \
+		--log-file /tmp/gnostr-bits-log \
+		--log-file-rust-log=debug,libgnostr-bits=trace \
 		server start /tmp/scratch/
 
 @PHONY: clean
@@ -29,11 +29,11 @@ clean:## 	clean
 
 @PHONY: sign-debug
 sign-debug:## 	sign-debug
-	codesign -f --entitlements resources/debugging.entitlements -s - target/debug/rqbit
+	codesign -f --entitlements resources/debugging.entitlements -s - target/debug/gnostr-bits
 
 @PHONY: sign-release
 sign-release:## 	sign-release
-	codesign -f --entitlements resources/debugging.entitlements -s - target/release/rqbit
+	codesign -f --entitlements resources/debugging.entitlements -s - target/release/gnostr-bits
 
 @PHONY: build-release
 build-release:## 	build-release
@@ -43,17 +43,17 @@ build-release:## 	build-release
 install: build-release## 	install
 	$(MAKE) build-release
 	$(MAKE) sign-release
-	install target/release/rqbit "$(HOME)/bin/"
+	install target/release/gnostr-bits "$(HOME)/bin/"
 
 @PHONY: release-macos-universal
 release-macos-universal:## 	release-macos-universal
 	cargo build --target aarch64-apple-darwin --profile release-github
 	cargo build --target x86_64-apple-darwin --profile release-github
 	lipo \
-		./target/aarch64-apple-darwin/release-github/rqbit \
-		./target/x86_64-apple-darwin/release-github/rqbit \
+		./target/aarch64-apple-darwin/release-github/gnostr-bits \
+		./target/x86_64-apple-darwin/release-github/gnostr-bits \
 		-create \
-		-output ./target/x86_64-apple-darwin/release-github/rqbit-osx-universal
+		-output ./target/x86_64-apple-darwin/release-github/gnostr-bits-osx-universal
 
 @PHONY: release-windows
 release-windows:## 	release-windowss
@@ -109,9 +109,9 @@ release-linux-armv7:## 	release-linux-armv7
 
 @PHONY: release-all
 release-all: release-windows release-linux release-macos-universal## 	release-all
-	rm -rf /tmp/rqbit-release
-	mkdir -p /tmp/rqbit-release
-	cp ./target/x86_64-pc-windows-gnu/release-github/rqbit.exe /tmp/rqbit-release
-	cp ./target/x86_64-apple-darwin/release-github/rqbit-osx-universal /tmp/rqbit-release
-	cp ./target/x86_64-unknown-linux-gnu/release-github/rqbit /tmp/rqbit-release/rqbit-linux-x86_64
-	echo "The release was built in /tmp/rqbit-release"
+	rm -rf /tmp/gnotr-bits-release
+	mkdir -p /tmp/gnostr-bitss-release
+	cp ./target/x86_64-pc-windows-gnu/release-github/gnostr-bits.exe /tmp/gnostr-bits-release
+	cp ./target/x86_64-apple-darwin/release-github/gnostr-bits-osx-universal /tmp/gnostr-bits-release
+	cp ./target/x86_64-unknown-linux-gnu/release-github/gnostr-bits /tmp/gnostr-bits-release/gnostr-bits-linux-x86_64
+	echo "The release was built in /tmp/gnostr-bits-release"

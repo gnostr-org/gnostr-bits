@@ -850,6 +850,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4271d37baee1b8c7e4b708028c57d816cf9d2434acb33a549475f78c181f6253"
 
 [[package]]
+name = "gnostr-bits"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bytes",
+ "clap",
+ "console-subscriber",
+ "futures",
+ "librqbit",
+ "openssl",
+ "parking_lot",
+ "parse_duration",
+ "regex",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "size_format",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "h2"
 version = "0.3.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2066,29 +2089,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3560f70f30a0f16d11d01ed078a07740fe6b489667abc7c7b029155d9f21c3d8"
 dependencies = [
  "libc",
-]
-
-[[package]]
-name = "rqbit"
-version = "5.5.1"
-dependencies = [
- "anyhow",
- "bytes",
- "clap",
- "clap_complete",
- "console-subscriber",
- "futures",
- "librqbit",
- "openssl",
- "parking_lot",
- "parse_duration",
- "regex",
- "serde",
- "serde_json",
- "size_format",
- "tokio",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]

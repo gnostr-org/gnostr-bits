@@ -1,12 +1,12 @@
 [package]
-name = "rqbit"
-version = "5.4.1"
+name = "gnostr-bits"
+version = "0.0.0"
 authors = ["Igor Katson <igor.katson@gmail.com>"]
 edition = "2021"
 description = "A bittorrent command line client and server."
 license = "Apache-2.0"
-documentation = "https://github.com/ikatson/rqbit"
-repository = "https://github.com/ikatson/rqbit"
+documentation = "https://github.com/gnostr-org/gnostr-bits"
+repository = "https://github.com/gnostr-org/gnostr-bits"
 readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

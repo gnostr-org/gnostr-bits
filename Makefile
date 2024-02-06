@@ -29,11 +29,11 @@ clean:## 	clean
 
 @PHONY: sign-debug
 sign-debug:## 	sign-debug
-	codesign -f --entitlements resources/debugging.entitlements -s - target/debug/gnostr-bits
+	codesign -f --entitlements resources/debugging.entitlements -s - target/debug/gnostr-bits || echo "codesign -f --entitlements ... failed"
 
 @PHONY: sign-release
 sign-release:## 	sign-release
-	codesign -f --entitlements resources/debugging.entitlements -s - target/release/gnostr-bits
+	codesign -f --entitlements resources/debugging.entitlements -s - target/release/gnostr-bits || echo "codesign -f --entitlements ... failed"
 
 @PHONY: build-release
 build-release:## 	build-release

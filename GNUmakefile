@@ -24,8 +24,7 @@ test-dl-from-local:## 	test-dl-from-local
 desktop:
 	@npx kill-port 4240 >/tmp/gnostr-bits.log || true
 	@npx kill-port 3030 >/tmp/gnostr-bits.log || true
-	@pushd desktop && npm run dev >/tmp/gnostr-bits.log &
-	@pushd desktop/src-tauri >/tmp/gnostr-bits.log && cargo run
+	@pushd desktop && npm run dev >/tmp/gnostr-bits.log & pushd desktop/src-tauri >/tmp/gnostr-bits.log && cargo run
 
 -include Makefile
 -include cargo.mk

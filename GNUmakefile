@@ -20,5 +20,9 @@ test-dl-from-local:## 	test-dl-from-local
 	rm -rf ~/.gnostr/bits/test-local
 	$(GNOSTR_BITS) download ./bitcoin-26.0.local.torrent -o ~/.gnostr/bits/test-local
 
+.PHONY:desktop
+desktop:
+	pushd desktop && npm run dev & pushd desktop/src-tauri && cargo run
+
 -include Makefile
 -include cargo.mk

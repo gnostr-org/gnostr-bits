@@ -1,9 +1,9 @@
 {
-  "name": "rqbit",
+  "name": "gnostr-bits-desktop",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "npx kill-port 1420 >/tmp/gnostr-bits.log && vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri"

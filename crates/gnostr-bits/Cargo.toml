@@ -1,9 +1,9 @@
 [package]
 name = "gnostr-bits"
-version = "0.0.1"
-authors = ["Igor Katson <igor.katson@gmail.com>"]
+version = "0.0.2"
+authors = ["admin <admin@gnostr.org>", "Igor Katson <igor.katson@gmail.com>"]
 edition = "2021"
-description = "A bittorrent command line client and server."
+description = "A bittorrent service for gnostr."
 license = "Apache-2.0"
 documentation = "https://github.com/gnostr-org/gnostr-bits"
 repository = "https://github.com/gnostr-org/gnostr-bits"

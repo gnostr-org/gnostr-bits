@@ -29,11 +29,11 @@ clean:## 	clean
 
 @PHONY: sign-debug
 sign-debug:## 	sign-debug
-	[ '$(shell uname -s)' == 'Darwin' ] && codesign -f --entitlements resources/debugging.entitlements -s - target/debug/gnostr-bits
+	bash -c "[ '$(shell uname -s)' == 'Darwin' ] && codesign -f --entitlements resources/debugging.entitlements -s - target/debug/gnostr-bits"
 
 @PHONY: sign-release
 sign-release:## 	sign-release
-	[ '$(shell uname -s)' == 'Darwin' ] && codesign -f --entitlements resources/debugging.entitlements -s - target/release/gnostr-bits
+	bash -c "[ '$(shell uname -s)' == 'Darwin' ] && codesign -f --entitlements resources/debugging.entitlements -s - target/release/gnostr-bits"
 
 @PHONY: build-release
 build-release:## 	build-release

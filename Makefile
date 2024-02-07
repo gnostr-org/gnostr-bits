@@ -29,11 +29,11 @@ clean:## 	clean
 
 @PHONY: sign-debug
 sign-debug:## 	sign-debug
-	[ '$(shell uname -s)' == 'Darwin' ] && codesign -f --entitlements resources/debugging.entitlements -s - target/debug/gnostr-bits
+	bash -c "[ '$(shell uname -s)' == 'Darwin' ] && codesign -f --entitlements resources/debugging.entitlements -s - target/debug/gnostr-bits"
 
 @PHONY: sign-release
 sign-release:## 	sign-release
-	[ '$(shell uname -s)' == 'Darwin' ] && codesign -f --entitlements resources/debugging.entitlements -s - target/release/gnostr-bits
+	bash -c "[ '$(shell uname -s)' == 'Darwin' ] && codesign -f --entitlements resources/debugging.entitlements -s - target/release/gnostr-bits"
 
 @PHONY: build-release
 build-release:## 	build-release
@@ -59,7 +59,6 @@ release-macos-universal:## 	release-macos-universal
 release-windows:## 	release-windowss
 	# prereqs:
 	# brew install mingw-w64
-	bash -c "[ '$(shell uname -s)' == 'Darwin' ] && brew install mingw-w64 || echo "
 	cargo build --target x86_64-pc-windows-gnu --profile release-github
 
 @PHONY: release-linux-current-target
@@ -110,8 +109,8 @@ release-linux-armv7:## 	release-linux-armv7
 
 @PHONY: release-all
 release-all: release-windows release-linux release-macos-universal## 	release-all
-	rm -rf /tmp/gnostr-bits-release
-	mkdir -p /tmp/gnostr-bits-release
+	rm -rf /tmp/gnotr-bits-release
+	mkdir -p /tmp/gnostr-bitss-release
 	cp ./target/x86_64-pc-windows-gnu/release-github/gnostr-bits.exe /tmp/gnostr-bits-release
 	cp ./target/x86_64-apple-darwin/release-github/gnostr-bits-osx-universal /tmp/gnostr-bits-release
 	cp ./target/x86_64-unknown-linux-gnu/release-github/gnostr-bits /tmp/gnostr-bits-release/gnostr-bits-linux-x86_64

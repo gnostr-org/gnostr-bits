@@ -3,16 +3,16 @@ all:
 @PHONY: webui-deps
 webui-deps:## 	webui-deps
 	cd desktop && npm install
-	cd crates/libgnostr-bits/webui && npm install
+	cd crates/librqbit/webui && npm install
 
 @PHONY: webui-dev
 webui-dev: webui-deps## 	webui-dev
-	cd crates/libgnostr-bits/webui && \
+	cd crates/librqbit/webui && \
 	npm run dev
 
 @PHONY: webui-build
 webui-build: webui-deps## 	webui-build
-	cd crates/libgnostr-bits/webui && \
+	cd crates/librqbit/webui && \
 	npm run build
 
 @PHONY: devserver
@@ -20,7 +20,7 @@ devserver:## 	devserver
 	echo -n '' > /tmp/gnostr-bits-log
 	cargo run --release -- \
 		--log-file /tmp/gnostr-bits-log \
-		--log-file-rust-log=debug,libgnostr-bits=trace \
+		--log-file-rust-log=debug,librqbit=trace \
 		server start /tmp/scratch/
 
 @PHONY: clean
@@ -29,11 +29,11 @@ clean:## 	clean
 
 @PHONY: sign-debug
 sign-debug:## 	sign-debug
-	codesign -f --entitlements resources/debugging.entitlements -s - target/debug/gnostr-bits || echo "codesign -f --entitlements ... failed"
+	bash -c "[ '$(shell uname -s)' == 'Darwin' ] && codesign -f --entitlements resources/debugging.entitlements -s - target/debug/gnostr-bits"
 
 @PHONY: sign-release
 sign-release:## 	sign-release
-	codesign -f --entitlements resources/debugging.entitlements -s - target/release/gnostr-bits || echo "codesign -f --entitlements ... failed"
+	bash -c "[ '$(shell uname -s)' == 'Darwin' ] && codesign -f --entitlements resources/debugging.entitlements -s - target/release/gnostr-bits"
 
 @PHONY: build-release
 build-release:## 	build-release

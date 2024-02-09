@@ -1,5 +1,5 @@
 build-release:cargo-build-release## 	build-release
-cargo-build-release:
+cargo-b-release:cargo-build-release
 cargo-build-release:## 	cargo-build-release
 	cargo b -r
 install:cargo-install## 	install

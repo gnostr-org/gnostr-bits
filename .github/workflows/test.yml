@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main", "master", "*", "*/*"]
   pull_request:
-    branches: [main]
+    branches: ["main", "master"]
 
 env:
   CARGO_TERM_COLOR: always
@@ -23,6 +23,8 @@ jobs:
       - run: rustup override set ${{ matrix.rust_version }}
       - name: cargo check
         run: cargo check
+      - name: Run tests
+        run: cargo test
   test:
     runs-on: windows-latest
     steps:

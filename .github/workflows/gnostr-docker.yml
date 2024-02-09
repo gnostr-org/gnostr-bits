@@ -48,4 +48,4 @@ jobs:
       - run: touch ~/GITHUB_TOKEN.txt
       - run: git config --global --add safe.directory /__w/gnostr**/gnostr** || true
       - run: make
-      - run: make install
+      - run: make cargo-b-release

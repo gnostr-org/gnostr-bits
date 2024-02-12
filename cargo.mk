@@ -1,11 +1,11 @@
 build-release:cargo-build-release## 	build-release
-cargo-build-release:
+cargo-b-release:cargo-build-release## 	cargo-build-release
 cargo-build-release:## 	cargo-build-release
-	cargo b -r
+	@cargo b -r
 install:cargo-install## 	install
 cargo-i:cargo-install
 cargo-install:## 	cargo-install
-	cargo install --path crates/gnostr-bits
+	@cargo install --path crates/gnostr-bits
 cargo-sort:## 	cargo-sort
 	@[ -x cargo-sort ] || cargo install cargo-sort
 	cargo-sort

@@ -1,6 +1,6 @@
 [package]
 name = "gnostr-bits"
-version = "0.0.2"
+version = "0.0.3"
 authors = ["admin <admin@gnostr.org>", "Igor Katson <igor.katson@gmail.com>"]
 edition = "2021"
 description = "A bittorrent service for gnostr."

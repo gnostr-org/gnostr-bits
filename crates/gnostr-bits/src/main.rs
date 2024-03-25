@@ -1,8 +1,7 @@
-use std::{io, net::SocketAddr, path::PathBuf, sync::Arc, time::Duration};
+use std::{net::SocketAddr, path::PathBuf, sync::Arc, time::Duration};
 
 use anyhow::Context;
-use clap::{CommandFactory, Parser, ValueEnum};
-use clap_complete::Shell;
+use clap::{Parser, ValueEnum};
 use librqbit::{
     api::ApiAddTorrentResponse,
     http_api::{HttpApi, HttpApiOptions},
@@ -286,6 +285,7 @@ async fn async_main(opts: Opts) -> anyhow::Result<()> {
                     for (idx, torrent) in torrents {
                         let stats = torrent.stats();
                         if let TorrentStatsState::Initializing = stats.state {
+
                             let total = stats.total_bytes;
                             let progress = stats.progress_bytes;
                             let pct =  (progress as f64 / total as f64) * 100f64;
@@ -536,5 +536,6 @@ async fn async_main(opts: Opts) -> anyhow::Result<()> {
             );
             Ok(())
         }
+
     }
 }

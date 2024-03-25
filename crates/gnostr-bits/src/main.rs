@@ -8,7 +8,7 @@ use librqbit::{
     http_api_client, librqbit_spawn,
     tracing_subscriber_config_utils::{init_logging, InitLoggingOptions},
     AddTorrent, AddTorrentOptions, AddTorrentResponse, Api, ListOnlyResponse,
-    PeerConnectionOptions, Session, SessionOptions,
+    PeerConnectionOptions, Session, SessionOptions, TorrentStatsState,
 };
 use size_format::SizeFormatterBinary as SF;
 use tracing::{error, error_span, info, trace_span, warn};
@@ -172,6 +172,12 @@ impl From<&str> for InitialPeers {
     }
 }
 
+#[derive(Parser)]
+struct CompletionsOpts {
+    /// The shell to generate completions for
+    shell: Shell,
+}
+
 // server start
 // download [--connect-to-existing] --output-folder(required) [file1] [file2]
 
@@ -179,6 +185,7 @@ impl From<&str> for InitialPeers {
 enum SubCommand {
     Server(ServerOpts),
     Download(DownloadOpts),
+    Completions(CompletionsOpts),
 }
 
 fn _start_deadlock_detector_thread() {
@@ -277,7 +284,8 @@ async fn async_main(opts: Opts) -> anyhow::Result<()> {
             session.with_torrents(|torrents| {
                     for (idx, torrent) in torrents {
                         let stats = torrent.stats();
-                        if stats.state == "initializing" {
+                        if let TorrentStatsState::Initializing = stats.state {
+
                             let total = stats.total_bytes;
                             let progress = stats.progress_bytes;
                             let pct =  (progress as f64 / total as f64) * 100f64;
@@ -519,5 +527,15 @@ async fn async_main(opts: Opts) -> anyhow::Result<()> {
                 }
             }
         }
+        SubCommand::Completions(completions_opts) => {
+            clap_complete::generate(
+                completions_opts.shell,
+                &mut Opts::command(),
+                "rqbit",
+                &mut io::stdout(),
+            );
+            Ok(())
+        }
+
     }
 }

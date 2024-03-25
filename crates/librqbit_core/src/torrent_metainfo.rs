@@ -27,20 +27,27 @@ pub fn torrent_from_bytes<'de, ByteBuf: Deserialize<'de>>(
 }
 
 /// A parsed .torrent file.
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TorrentMetaV1<BufType> {
     pub announce: BufType,
-    #[serde(rename = "announce-list", default = "Vec::new")]
+    #[serde(
+        rename = "announce-list",
+        default = "Vec::new",
+        skip_serializing_if = "Vec::is_empty"
+    )]
     pub announce_list: Vec<Vec<BufType>>,
     pub info: TorrentMetaV1Info<BufType>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub comment: Option<BufType>,
-    #[serde(rename = "created by")]
+    #[serde(rename = "created by", skip_serializing_if = "Option::is_none")]
     pub created_by: Option<BufType>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub encoding: Option<BufType>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub publisher: Option<BufType>,
-    #[serde(rename = "publisher-url")]
+    #[serde(rename = "publisher-url", skip_serializing_if = "Option::is_none")]
     pub publisher_url: Option<BufType>,
-    #[serde(rename = "creation date")]
+    #[serde(rename = "creation date", skip_serializing_if = "Option::is_none")]
     pub creation_date: Option<usize>,
 
     #[serde(skip)]
@@ -49,7 +56,10 @@ pub struct TorrentMetaV1<BufType> {
 
 impl<BufType> TorrentMetaV1<BufType> {
     pub fn iter_announce(&self) -> impl Iterator<Item = &BufType> {
-        once(&self.announce).chain(self.announce_list.iter().flatten())
+        if self.announce_list.iter().flatten().next().is_some() {
+            return itertools::Either::Left(self.announce_list.iter().flatten());
+        }
+        itertools::Either::Right(once(&self.announce))
     }
 }
 
@@ -159,6 +169,7 @@ impl<BufType: AsRef<[u8]>> TorrentMetaV1Info<BufType> {
         Some(expected_hash == hash)
     }
 
+    #[inline(never)]
     pub fn iter_filenames_and_lengths(
         &self,
     ) -> anyhow::Result<impl Iterator<Item = (FileIteratorName<'_, BufType>, u64)>> {

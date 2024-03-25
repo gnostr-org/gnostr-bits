@@ -25,6 +25,7 @@
 pub mod api;
 mod api_error;
 mod chunk_tracker;
+mod create_torrent_file;
 mod dht_utils;
 mod file_ops;
 pub mod http_api;
@@ -36,11 +37,11 @@ mod session;
 mod spawn_utils;
 mod torrent_state;
 pub mod tracing_subscriber_config_utils;
-mod tracker_comms;
 mod type_aliases;
 
 pub use api::Api;
 pub use api_error::ApiError;
+pub use create_torrent_file::{create_torrent, CreateTorrentOptions};
 pub use dht;
 pub use peer_connection::PeerConnectionOptions;
 pub use session::{
@@ -48,13 +49,16 @@ pub use session::{
     SUPPORTED_SCHEMES,
 };
 pub use spawn_utils::spawn as librqbit_spawn;
-pub use torrent_state::{ManagedTorrent, ManagedTorrentState};
+pub use torrent_state::{ManagedTorrent, ManagedTorrentState, TorrentStats, TorrentStatsState};
 
 pub use buffers::*;
 pub use clone_to_owned::CloneToOwned;
 pub use librqbit_core::magnet::*;
 pub use librqbit_core::peer_id::*;
 pub use librqbit_core::torrent_metainfo::*;
+
+#[cfg(test)]
+mod tests;
 
 /// The cargo version of librqbit.
 pub fn version() -> &'static str {

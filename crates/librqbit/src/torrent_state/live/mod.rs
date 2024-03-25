@@ -57,7 +57,6 @@ use std::{
 
 use anyhow::{bail, Context};
 use backoff::backoff::Backoff;
-use bencode::from_bytes;
 use buffers::{ByteBuf, ByteString};
 use clone_to_owned::CloneToOwned;
 use futures::{stream::FuturesUnordered, StreamExt};
@@ -83,7 +82,6 @@ use tokio::{
 };
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, error, error_span, info, trace, warn};
-use url::Url;
 
 use crate::{
     chunk_tracker::{ChunkMarkingResult, ChunkTracker},
@@ -93,7 +91,6 @@ use crate::{
     },
     session::CheckedIncomingConnection,
     torrent_state::{peer::Peer, utils::atomic_inc},
-    tracker_comms::{TrackerError, TrackerRequest, TrackerRequestEvent, TrackerResponse},
     type_aliases::{PeerHandle, BF},
 };
 
@@ -130,6 +127,10 @@ fn dummy_file() -> anyhow::Result<std::fs::File> {
         .read(true)
         .open(DEVNULL)
         .with_context(|| format!("error opening {}", DEVNULL))
+}
+
+fn make_piece_bitfield(lengths: &Lengths) -> BF {
+    BF::from_vec(vec![0; lengths.piece_bitfield_bytes()])
 }
 
 pub(crate) struct TorrentStateLocked {
@@ -233,13 +234,6 @@ impl TorrentStateLive {
             cancellation_token,
         });
 
-        for tracker in state.meta.trackers.iter() {
-            state.spawn(
-                error_span!(parent: state.meta.span.clone(), "tracker_monitor", url = tracker.to_string()),
-                state.clone().task_single_tracker_monitor(tracker.clone()),
-            );
-        }
-
         state.spawn(
             error_span!(parent: state.meta.span.clone(), "speed_estimator_updater"),
             {
@@ -291,74 +285,6 @@ impl TorrentStateLive {
 
     pub fn up_speed_estimator(&self) -> &SpeedEstimator {
         &self.up_speed_estimator
-    }
-
-    async fn tracker_one_request(&self, tracker_url: Url) -> anyhow::Result<u64> {
-        let response: reqwest::Response = reqwest::get(tracker_url).await?;
-        if !response.status().is_success() {
-            anyhow::bail!("tracker responded with {:?}", response.status());
-        }
-        let bytes = response.bytes().await?;
-        if let Ok(error) = from_bytes::<TrackerError>(&bytes) {
-            anyhow::bail!(
-                "tracker returned failure. Failure reason: {}",
-                error.failure_reason
-            )
-        };
-        let response = from_bytes::<TrackerResponse>(&bytes)?;
-
-        for peer in response.peers.iter_sockaddrs() {
-            self.add_peer_if_not_seen(peer)?;
-        }
-        Ok(response.interval)
-    }
-
-    async fn task_single_tracker_monitor(
-        self: Arc<Self>,
-        mut tracker_url: Url,
-    ) -> anyhow::Result<()> {
-        let mut event = Some(TrackerRequestEvent::Started);
-        loop {
-            let request = TrackerRequest {
-                info_hash: self.info_hash(),
-                peer_id: self.peer_id(),
-                port: 6778,
-                uploaded: self.get_uploaded_bytes(),
-                downloaded: self.get_downloaded_bytes(),
-                left: self.get_left_to_download_bytes(),
-                compact: true,
-                no_peer_id: false,
-                event,
-                ip: None,
-                numwant: None,
-                key: None,
-                trackerid: None,
-            };
-
-            let request_query = request.as_querystring();
-            tracker_url.set_query(Some(&request_query));
-
-            match self.tracker_one_request(tracker_url.clone()).await {
-                Ok(interval) => {
-                    event = None;
-                    let interval = self
-                        .meta
-                        .options
-                        .force_tracker_interval
-                        .unwrap_or_else(|| Duration::from_secs(interval));
-                    debug!(
-                        "sleeping for {:?} after calling tracker {}",
-                        interval,
-                        tracker_url.host().unwrap()
-                    );
-                    tokio::time::sleep(interval).await;
-                }
-                Err(e) => {
-                    debug!("error calling the tracker {}: {:#}", tracker_url, e);
-                    tokio::time::sleep(Duration::from_secs(60)).await;
-                }
-            };
-        }
     }
 
     pub(crate) fn add_incoming_peer(
@@ -429,10 +355,7 @@ impl TorrentStateLive {
             addr: checked_peer.addr,
             on_bitfield_notify: Default::default(),
             unchoke_notify: Default::default(),
-            locked: RwLock::new(PeerHandlerLocked {
-                i_am_choked: true,
-                previously_requested_pieces: BF::new(),
-            }),
+            locked: RwLock::new(PeerHandlerLocked { i_am_choked: true }),
             requests_sem: Semaphore::new(0),
             state: self.clone(),
             tx,
@@ -493,10 +416,7 @@ impl TorrentStateLive {
             addr,
             on_bitfield_notify: Default::default(),
             unchoke_notify: Default::default(),
-            locked: RwLock::new(PeerHandlerLocked {
-                i_am_choked: true,
-                previously_requested_pieces: BF::new(),
-            }),
+            locked: RwLock::new(PeerHandlerLocked { i_am_choked: true }),
             requests_sem: Semaphore::new(0),
             state: state.clone(),
             tx,
@@ -780,10 +700,6 @@ impl TorrentStateLive {
 
 struct PeerHandlerLocked {
     pub i_am_choked: bool,
-
-    // This is used to only request a piece from a peer once when stealing from others.
-    // So that you don't steal then re-steal the same piece in a loop.
-    pub previously_requested_pieces: BF,
 }
 
 // All peer state that would never be used by other actors should pe put here.
@@ -1117,8 +1033,7 @@ impl PeerHandler {
                 // If bitfield wasn't allocated yet, let's do it. Some clients start empty so they never
                 // send bitfields.
                 if live.bitfield.is_empty() {
-                    live.bitfield =
-                        BF::from_vec(vec![0; self.state.lengths.piece_bitfield_bytes()]);
+                    live.bitfield = make_piece_bitfield(&self.state.lengths);
                 }
                 match live.bitfield.get_mut(have as usize) {
                     Some(mut v) => *v = true,
@@ -1128,8 +1043,8 @@ impl PeerHandler {
                     }
                 };
                 trace!("updated bitfield with have={}", have);
-                self.on_bitfield_notify.notify_waiters();
             });
+        self.on_bitfield_notify.notify_waiters();
     }
 
     fn on_bitfield(&self, bitfield: ByteString) -> anyhow::Result<()> {
@@ -1140,7 +1055,6 @@ impl PeerHandler {
                 self.state.lengths.piece_bitfield_bytes(),
             );
         }
-        self.locked.write().previously_requested_pieces = BF::from_vec(vec![0; bitfield.len()]);
         self.state
             .peers
             .update_bitfield_from_vec(self.addr, bitfield.0);
@@ -1228,11 +1142,6 @@ impl PeerHandler {
                     continue;
                 }
             };
-
-            self.locked
-                .write()
-                .previously_requested_pieces
-                .set(next.get() as usize, true);
 
             for chunk in self.state.lengths.iter_chunk_infos(next) {
                 let request = Request {

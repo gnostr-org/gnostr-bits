@@ -1,4 +1,5 @@
 build-release:cargo-build-release## 	build-release
+cargo-br: cargo-b-release
 cargo-b-release:cargo-build-release## 	cargo-build-release
 cargo-build-release:## 	cargo-build-release
 	@cargo b -r

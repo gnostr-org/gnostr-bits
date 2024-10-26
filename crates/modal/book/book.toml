@@ -1,0 +1,13 @@
+[book]
+authors        = ["Casey Rodarmor"]
+create-missing = false
+language       = "en"
+multilingual   = false
+src            = "src"
+title          = "Intermodal"
+
+[output.html]
+additional-css     = ["custom.css"]
+curly-quotes       = true
+default-theme      = "ayu"
+git-repository-url = "https://github.com/casey/intermodal"

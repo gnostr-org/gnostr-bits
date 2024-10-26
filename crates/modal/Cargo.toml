@@ -1,0 +1,115 @@
+[package]
+name = "gnostr-modal"
+version = "0.0.2"
+description = "📦 A 40' shipping container for the internet"
+authors = ["Casey Rodarmor <casey@rodarmor.com>"]
+license = "CC0-1.0"
+readme = "README.md"
+keywords = ["p2p", "sharing", "bittorrent", "torrent"]
+categories = ["command-line-utilities"]
+homepage = "https://github.com/gnostr-org/gnostr-modal"
+repository = "https://github.com/gnostr-org/gnostr-modal"
+edition = "2021"
+default-run = "gnostr-modal"
+
+[features]
+default = []
+
+[dependencies]
+ansi_term = "0.12.0"
+atty = "0.2.0"
+chrono = "0.4.1"
+console = "0.15.7"
+globset = "0.4.0"
+hex = "0.4.2"
+ignore = "0.4.14"
+lazy_static = "1.4.0"
+lexiclean = "0.0.1"
+libc = "0.2.0"
+log = "0.4.8"
+md5 = "0.7.0"
+open = "5.0.1"
+pretty_assertions = "1.4.0"
+pretty_env_logger = "0.5.0"
+rand = "0.8.5"
+rayon = "1.8.0"
+regex = "1.10.2"
+serde-hex = "0.1.0"
+serde_bytes = "0.11.0"
+serde_json = "1.0.57"
+serde_with = "3.4.0"
+sha1 = "0.6.0"
+snafu = "0.6.0"
+static_assertions = "1.0.0"
+strum = "0.25.0"
+strum_macros = "0.25.3"
+tempfile = "3.0.0"
+unicode-width = "0.1.0"
+
+[dependencies.bendy]
+version = "0.3.0"
+features = ["serde"]
+
+[dependencies.indicatif]
+version = "0.14.0"
+package = "imdl-indicatif"
+
+[dependencies.serde]
+version = "1.0.103"
+features = ["derive"]
+
+[dependencies.structopt]
+version = "0.3.0"
+features = ["default", "wrap_help"]
+
+[dependencies.url]
+version = "2.1.1"
+features = ["serde"]
+
+[dev-dependencies]
+criterion = "0.5.1"
+temptree = "0.2.0"
+
+# [workspace]
+# members = [
+#   # generate documentation
+#   "bin/gen",
+# 
+#   # run commands for demo animation
+#   "bin/demo",
+# 
+#   # update changelog contributor credits
+#   "bin/update-contributors",
+# ]
+
+## # Config for 'cargo dist'
+## [workspace.metadata.dist]
+## # The preferred cargo-dist version to use in CI (Cargo.toml SemVer syntax)
+## cargo-dist-version = "0.22.1"
+## # CI backends to support
+## ci = "github"
+## # The installers to generate for each app
+## installers = ["shell", "powershell", "homebrew"]
+## # A GitHub repo to push Homebrew formulas to
+## tap = "gnostr-org/homebrew-gnostr-org"
+## # Target platforms to build apps for (Rust target-triple syntax)
+## targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-unknown-linux-musl", "x86_64-pc-windows-msvc"]
+## # Path that installers should place binaries in
+## install-path = "CARGO_HOME"
+## # Publish jobs to run in CI
+## publish-jobs = ["homebrew"]
+## # Whether to install an updater program
+## install-updater = true
+
+[[bench]]
+name = "hasher"
+harness = false
+
+# enable release build link time optimization
+# [profile.release]
+# lto = true
+
+# The profile that 'cargo dist' will build with
+# [profile.dist]
+# inherits = "release"
+# lto = "thin"

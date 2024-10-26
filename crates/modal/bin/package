@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+set -euxo pipefail
+
+VERSION=${REF#"refs/tags/"}
+DIST=`pwd`/target/dist
+
+echo "Packaging gnostr-modal $VERSION for $TARGET..."
+
+test -f Cargo.lock || cargo generate-lockfile
+
+echo "Installing rust toolchain for $TARGET..."
+rustup target add $TARGET
+
+echo "Building gnostr-modal..."
+
+case $OS in
+  ubuntu-latest)
+    sudo apt install help2man musl-tools
+    ;;
+esac
+
+RUSTFLAGS="--deny warnings --codegen target-feature=+crt-static $TARGET_RUSTFLAGS" \
+  cargo build --bin gnostr-modal --target $TARGET --release
+EXECUTABLE=target/$TARGET/release/gnostr-modal
+
+if [[ $OS == windows-2016 ]]; then
+  EXECUTABLE=$EXECUTABLE.exe
+fi
+
+echo "Building debug build"
+cargo build
+DEBUG_EXECUTABLE=target/debug/gnostr-modal
+
+if [[ $OS == windows-2016 ]]; then
+  DEBUG_EXECUTABLE=$DEBUG_EXECUTABLE.exe
+fi
+
+echo "Building completions..."
+cargo run --package gen -- --bin $DEBUG_EXECUTABLE completion-scripts
+
+echo "Generating readme..."
+cargo run --package gen -- --bin $DEBUG_EXECUTABLE readme
+
+echo "Copying static files..."
+mkdir -p $DIST
+cp -r \
+  $EXECUTABLE \
+  CONTRIBUTING \
+  Cargo.lock \
+  Cargo.toml \
+  LICENSE \
+  $DIST
+
+echo "Copying generated files..."
+cp -r \
+  target/gen/README.md \
+  target/gen/completions \
+  $DIST
+
+if [[ $OS != windows-latest ]]; then
+  echo "Building man pages..."
+  cargo run --package gen -- --bin $DEBUG_EXECUTABLE man
+  cp -r target/gen/man $DIST/man
+fi
+
+cd $DIST
+echo "Creating release archive..."
+case $OS in
+  ubuntu-latest | macos-latest)
+    ARCHIVE=$DIST/gnostr-modal-$VERSION-$TARGET.tar.gz
+    tar czf $ARCHIVE *
+    echo "archive=$ARCHIVE" >> $GITHUB_OUTPUT
+    ;;
+  windows-latest)
+    ARCHIVE=$DIST/gnostr-modal-$VERSION-$TARGET.zip
+    7z a $ARCHIVE *
+    echo "archive=`pwd -W`/gnostr-modal-$VERSION-$TARGET.zip" >> $GITHUB_OUTPUT
+    ;;
+esac

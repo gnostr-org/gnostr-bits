@@ -6,7 +6,8 @@ cargo-build-release:## 	cargo-build-release
 install:cargo-install## 	install
 cargo-i:cargo-install
 cargo-install:## 	cargo-install
-	@cargo install --path crates/gnostr-bits
+	@cargo install --path crates/bits
+	@cargo install --path crates/modal
 cargo-sort:## 	cargo-sort
 	@[ -x cargo-sort ] || cargo install cargo-sort
 	cargo-sort

@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "npx kill-port 1420 >/tmp/gnostr-bits.log && vite",
+    "host": "npx kill-port 1420 >/tmp/gnostr-bits.log && vite --host",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri"
